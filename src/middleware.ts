@@ -7,7 +7,7 @@ export default function createMiddleware(route: CableCarRoute): Middleware {
     return (store) => (next) => (action) => {
         // only look at active cable cars w/ matching permitted actions
         const relevantCars = route.cars.filter(
-            (car) => car.active && car.permitsAction(action)
+            (car) => car.active && car.permitsSendingAction(action)
         )
         let serverOnlyAction = false
 

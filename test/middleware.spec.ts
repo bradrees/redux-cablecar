@@ -111,7 +111,7 @@ describe('Middleware (integration)', () => {
         beforeEach(() => {
             car1 = new CableCar(consumer, store, 'channel')
             car2 = new CableCar(consumer, store, 'channel2', {
-                permittedActions: 'NOT',
+                permittedSendActions: 'NOT',
             })
             route.addCar(car1)
             mockChannels['channel'].initialized()
@@ -146,7 +146,7 @@ describe('Middleware (integration)', () => {
         it('passes thru unpermitted actions to redux', () => {
             let action1 = { type: 'someaction' }
             car = new CableCar(consumer, store, 'channel', {
-                permittedActions: () => false,
+                permittedSendActions: () => false,
             })
             route.addCar(car)
             mockChannels['channel'].initialized()
@@ -157,7 +157,7 @@ describe('Middleware (integration)', () => {
 
         it('sends permits actions properly', () => {
             car = new CableCar(consumer, store, 'channel2', {
-                permittedActions: 'PRE',
+                permittedSendActions: 'PRE',
             })
             route.addCar(car)
             mockChannels['channel2'].initialized()

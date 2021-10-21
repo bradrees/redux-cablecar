@@ -205,7 +205,7 @@ describe('CableCar', () => {
             type: 'testing',
             meta: { __cablecar__: true },
         }
-        expect(cc.permitsAction(ccAction)).toEqual(false)
+        expect(cc.permitsSendingAction(ccAction)).toEqual(false)
     })
 
     it('utilizes permitted action function (default)', () => {
@@ -214,16 +214,16 @@ describe('CableCar', () => {
             type: 'RAILS_testing',
             meta: {},
         }
-        expect(cc.permitsAction(action1)).toEqual(true)
+        expect(cc.permitsSendingAction(action1)).toEqual(true)
     })
 
     it('utilizes permitted action function (custom)', () => {
         let mockPermit = jest.fn()
         let cc = new CableCar(consumer, store, 'channel', {
-            permittedActions: mockPermit,
+            permittedSendActions: mockPermit,
         })
         let action1 = { type: 'test', meta: {} }
-        cc.permitsAction(action1)
+        cc.permitsSendingAction(action1)
         expect(mockPermit).toHaveBeenCalledWith(action1)
     })
 
@@ -237,64 +237,64 @@ describe('CableCar', () => {
         expect(store.getActions()).toEqual([])
     })
 
-    describe('#permitsAction', () => {
+    describe('#permitsSendingAction', () => {
         it('permits actions properly (empty string)', () => {
             const car = new CableCar(consumer, store, 'channel2', {
-                permittedActions: '',
+                permittedSendActions: '',
             })
             let action1 = { type: 'anything' }
-            expect(car.permitsAction(action1)).toEqual(true)
+            expect(car.permitsSendingAction(action1)).toEqual(true)
         })
 
         it('permits actions properly (prefix string)', () => {
             const car = new CableCar(consumer, store, 'channel2', {
-                permittedActions: 'PRE',
+                permittedSendActions: 'PRE',
             })
             let action1 = { type: 'PRE_act1' }
             let action2 = { type: 'PRE_act2' }
             let action3 = { type: 'NON_PRE_act3' }
-            expect(car.permitsAction(action1)).toEqual(true)
-            expect(car.permitsAction(action2)).toEqual(true)
-            expect(car.permitsAction(action3)).toEqual(false)
+            expect(car.permitsSendingAction(action1)).toEqual(true)
+            expect(car.permitsSendingAction(action2)).toEqual(true)
+            expect(car.permitsSendingAction(action3)).toEqual(false)
         })
 
         it('permits actions properly (list of strings/regexp)', () => {
             const car = new CableCar(consumer, store, 'channel2', {
-                permittedActions: ['EITHER', 'OR', /^YES/],
+                permittedSendActions: ['EITHER', 'OR', /^YES/],
             })
             let action1 = { type: 'EITHER_act1' }
             let action2 = { type: 'OR_act2' }
             let action3 = { type: 'NOT_act3' }
             let action4 = { type: 'YES_act3' }
-            expect(car.permitsAction(action1)).toEqual(true)
-            expect(car.permitsAction(action2)).toEqual(true)
-            expect(car.permitsAction(action3)).toEqual(false)
-            expect(car.permitsAction(action4)).toEqual(true)
+            expect(car.permitsSendingAction(action1)).toEqual(true)
+            expect(car.permitsSendingAction(action2)).toEqual(true)
+            expect(car.permitsSendingAction(action3)).toEqual(false)
+            expect(car.permitsSendingAction(action4)).toEqual(true)
         })
 
         it('permits actions properly (RegExp)', () => {
             const car = new CableCar(consumer, store, 'channel2', {
-                permittedActions: /^START.+FINISH$/,
+                permittedSendActions: /^START.+FINISH$/,
             })
             let action1 = { type: 'START_act1_FINISH' }
             let action2 = { type: 'START_act2' }
             let action3 = { type: 'NOT_act3_FINISH' }
-            expect(car.permitsAction(action1)).toEqual(true)
-            expect(car.permitsAction(action2)).toEqual(false)
-            expect(car.permitsAction(action3)).toEqual(false)
+            expect(car.permitsSendingAction(action1)).toEqual(true)
+            expect(car.permitsSendingAction(action2)).toEqual(false)
+            expect(car.permitsSendingAction(action3)).toEqual(false)
         })
 
         it('permits actions properly (function)', () => {
             const car = new CableCar(consumer, store, 'channel2', {
-                permittedActions: (a: CableCarActionFilter) =>
+                permittedSendActions: (a: CableCarActionFilter) =>
                     a['payload'] % 7 === 5,
             })
             let action1 = { type: 'EXACT', payload: 12 }
             let action2 = { type: 'EXACTly', payload: 10 }
             let action3 = { type: '-EXACT' }
-            expect(car.permitsAction(action1)).toEqual(true)
-            expect(car.permitsAction(action2)).toEqual(false)
-            expect(car.permitsAction(action3)).toEqual(false)
+            expect(car.permitsSendingAction(action1)).toEqual(true)
+            expect(car.permitsSendingAction(action2)).toEqual(false)
+            expect(car.permitsSendingAction(action3)).toEqual(false)
         })
 
         it('permits actions properly (matchChannel)', () => {
@@ -312,10 +312,10 @@ describe('CableCar', () => {
                 type: 'RAILS/third',
                 meta: { channel: 'channelTwo' },
             }
-            expect(car.permitsAction(action1)).toEqual(true)
-            expect(car.permitsAction(action2)).toEqual(false)
-            expect(car2.permitsAction(action1)).toEqual(false)
-            expect(car2.permitsAction(action2)).toEqual(true)
+            expect(car.permitsSendingAction(action1)).toEqual(true)
+            expect(car.permitsSendingAction(action2)).toEqual(false)
+            expect(car2.permitsSendingAction(action1)).toEqual(false)
+            expect(car2.permitsSendingAction(action2)).toEqual(true)
         })
     })
 })

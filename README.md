@@ -34,7 +34,7 @@ Initialize the cablecar to the redux store with the Rails ActionCable channel
 ```js6
 const options = {
     params: { room: 'game' },
-    permittedActions: ['SERVER', 'RAILS', /.+ALSO_TO_SERVER$/]
+    permittedSendActions: ['SERVER', 'RAILS', /.+ALSO_TO_SERVER$/]
 }
 
 const cableCar = cableCarRoute.connect(store, 'MainChannel', options)
@@ -70,7 +70,7 @@ Name of the ActionCable channel (ie. 'ChatChannel').
 
 ### options (object)
 - `params` - *object* sent to ActionCable channel (ie. `params[:room]`)  
-- `permittedActions` - *string, RegExp, (string|RegExp)[], function* - filters actions that get sent to the server
+- `permittedSendActions` - *string, RegExp, (string|RegExp)[], function* - filters actions that get sent to the server
 - `matchChannel` - *boolean* optional shortcut for using multiple channels
 - `silent` - *boolean* creates one-way communication to Rails (filtered client actions get sent to the server, but no server messages will dispatch redux actions) 
 
@@ -87,25 +87,25 @@ By default this is any action of with a type prefix `RAILS`.
   
 **Example: `{ type: 'RAILS_ACTION' }`**
   
-It can be customized with the `permittedActions` option.  
+It can be customized with the `permittedSendActions` option.  
   
 ### String (prefix)
 ```js6
-cableCarRoute.connect(store, 'channelName', { permittedActions: 'my_prefix/' })
+cableCarRoute.connect(store, 'channelName', { permittedSendActions: 'my_prefix/' })
 ```
 This will match `my_prefix/anyaction`.
 ### RegExp
 ```js6
-cableCarRoute.connect(store, 'channelName', { permittedActions: /suffix$/ })
+cableCarRoute.connect(store, 'channelName', { permittedSendActions: /suffix$/ })
 ```
 ### List of strings OR regular expressions
 ```js6
-cableCarRoute.connect(store, 'channelName', { permittedActions: ['prefix', /orsuffix$/] })
+cableCarRoute.connect(store, 'channelName', { permittedSendActions: ['prefix', /orsuffix$/] })
 ```
 ### Custom Function
 ```js6
 cableCarRoute.connect(store, 'channelName', {
-    permittedActions: action => action.server === true
+    permittedSendActions: action => action.server === true
 })
 ```
 ### Match Channel
@@ -121,10 +121,10 @@ cableCarRoute.connect(store, 'channelTwo', {
 This is the equivalent of writing:
 ```js6
 cableCarRoute.connect(store, 'channelOne', {
-    permittedActions: (action) => action.meta.channel === 'channelOne'
+    permittedSendActions: (action) => action.meta.channel === 'channelOne'
 })
 cableCarRoute.connect(store, 'channelTwo', {
-    permittedActions: (action) => action.meta.channel === 'channelTwo'
+    permittedSendActions: (action) => action.meta.channel === 'channelTwo'
 })
 ```
   
@@ -174,7 +174,7 @@ end
 Sends a direct message to Rails (outside of the Redux middleware chain)
 
 # Optimistic Actions
-Redux actions matching the `permittedActions` criteria get sent to the Rails server.
+Redux actions matching the `permittedSendActions` criteria get sent to the Rails server.
 
 However if `isOptimistic: true` is in the action meta property, then the action will be sent to both the Rails Server, as well as being propagated thru the rest of the Redux middlewares. These actions are considered 'optimistic' updates, since when news comes back from the server it may conflict with changes that have already been made on the client.
   

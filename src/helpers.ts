@@ -37,6 +37,6 @@ export const getPermittedActionsFn = (
 
     // handle errors
     throw new TypeError(
-        `CableCar: 'permittedActions' option is not formatted correctly (string|string[]|RegExp|function)`
+        `CableCar: 'permittedSendActions' or 'permittedReceiveActions' option is not formatted correctly (string|string[]|RegExp|function)`
     )
 }

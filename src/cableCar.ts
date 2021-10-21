@@ -21,15 +21,18 @@ export type CableCarAction = Action & {
     meta: { __cablecar__: boolean; __cablecarChannel__: string }
 }
 
+type PermittedActions =
+    | string
+    | RegExp
+    | CableCarActionFilter
+    | (string | RegExp)[]
+
 /* CableCarOptions Interface */
 export interface CableCarOptions {
     params?: any
     matchChannel?: boolean
-    permittedActions?:
-        | string
-        | RegExp
-        | CableCarActionFilter
-        | (string | RegExp)[]
+    permittedSendActions?: PermittedActions
+    permittedReceiveActions?: PermittedActions
     silent?: boolean
     // callbacks
     initialized?: () => void
@@ -50,7 +53,8 @@ export default class CableCar {
     subscription: any
 
     private _options: CableCarOptions = {}
-    private _permittedActionFn: CableCarActionFilter = () => true
+    private _permittedSendActionFn: CableCarActionFilter = () => true
+    private _permittedReceiveActionFn: CableCarActionFilter = () => true
     private _destroyCallback
 
     get options() {
@@ -58,15 +62,28 @@ export default class CableCar {
     }
 
     set options(opts: CableCarOptions) {
-        // get permitted actions function if option passed in
-        if (opts.permittedActions !== undefined) {
-            this._permittedActionFn = getPermittedActionsFn(
-                opts.permittedActions
+        // get permitted send actions function if option passed in
+        if (opts.permittedSendActions !== undefined) {
+            this._permittedSendActionFn = getPermittedActionsFn(
+                opts.permittedSendActions
             )
 
             // otherwise use default
         } else {
-            this._permittedActionFn = getPermittedActionsFn(
+            this._permittedSendActionFn = getPermittedActionsFn(
+                DEFAULT_PERMITTED_ACTIONS_PREFIX
+            )
+        }
+
+        // get permitted receive actions function if option passed in
+        if (opts.permittedReceiveActions !== undefined) {
+            this._permittedReceiveActionFn = getPermittedActionsFn(
+                opts.permittedReceiveActions
+            )
+
+            // otherwise use default
+        } else {
+            this._permittedReceiveActionFn = getPermittedActionsFn(
                 DEFAULT_PERMITTED_ACTIONS_PREFIX
             )
         }
@@ -137,7 +154,13 @@ export default class CableCar {
 
     // public
 
-    permitsAction(action: AnyAction) {
+    permitsSendingAction(action: AnyAction) {
+        this.permitsAction(action)
+    }
+
+    // private
+
+    permitsAction(action: AnyAction, isSend = true) {
         // avoid recursively dispatching backend <=> frontend actions
         let permitted = !(action.meta && action.meta[ACTION_META_FLAG])
 
@@ -152,15 +175,19 @@ export default class CableCar {
             return false
 
         // use permitted function to filter valid backend actions
-        if (permitted) permitted = this._permittedActionFn(action)
+        if (permitted) permitted = isSend ? this._permittedSendActionFn(action) : this._permittedReceiveActionFn(action)
         return permitted
     }
 
-    // private
+    permitsReceivingAction(action: AnyAction) {
+        this.permitsAction(action, false)
+    }
 
     init() {
         const dispatch = (action: Action) => {
-            if (this.store && !this.options.silent) this.store.dispatch(action)
+            if (this.store && !this.options.silent && this.permitsReceivingAction(action)) {
+                this.store.dispatch(action)
+            }
         }
         const createGenericAction = (actionType: string) => {
             return createAction(actionType, () => ({
