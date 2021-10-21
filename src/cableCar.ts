@@ -155,12 +155,6 @@ export default class CableCar {
     // public
 
     permitsSendingAction(action: AnyAction) {
-        this.permitsAction(action)
-    }
-
-    // private
-
-    permitsAction(action: AnyAction, isSend = true) {
         // avoid recursively dispatching backend <=> frontend actions
         let permitted = !(action.meta && action.meta[ACTION_META_FLAG])
 
@@ -175,17 +169,15 @@ export default class CableCar {
             return false
 
         // use permitted function to filter valid backend actions
-        if (permitted) permitted = isSend ? this._permittedSendActionFn(action) : this._permittedReceiveActionFn(action)
+        if (permitted) permitted = this._permittedSendActionFn(action)
         return permitted
     }
 
-    permitsReceivingAction(action: AnyAction) {
-        this.permitsAction(action, false)
-    }
+    // private
 
     init() {
         const dispatch = (action: Action) => {
-            if (this.store && !this.options.silent && this.permitsReceivingAction(action)) {
+            if (this.store && !this.options.silent && this._permittedReceiveActionFn(action)) {
                 this.store.dispatch(action)
             }
         }
