@@ -7,7 +7,7 @@ export default class CableCarDispatcher {
     consumerFor(route: CableCarRoute) {
         const key = route.webSocketURL || 'default'
         if (!this.consumers[key]) {
-            const consumer = route.provider.createConsumer(route.webSocketURL)
+            const consumer = route.consumer || route.provider.createConsumer(route.webSocketURL)
             this.consumers[key] = consumer
         }
         return this.consumers[key]

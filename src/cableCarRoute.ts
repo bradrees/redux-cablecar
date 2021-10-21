@@ -4,6 +4,7 @@ import CableCar from './cableCar'
 export interface CableCarRouteOptions {
     provider?: any
     webSocketURL?: string | null
+    consumer?: any
 }
 
 /* CableCarRoute Class */
@@ -11,10 +12,12 @@ export default class CableCarRoute {
     cars: CableCar[] = []
     provider: any
     webSocketURL: string | null = null
+    consumer: any = null
 
     constructor(options: CableCarRouteOptions = {}) {
         this.webSocketURL = options.webSocketURL || null
         this.provider = options.provider || actionCableProvider
+        this.consumer = options.consumer || null
     }
 
     addCar(car: CableCar) {
